@@ -1,4 +1,4 @@
-id: US-003
+<pre>```id: US-003
 epic: OBP
 date: 20250928
 title: "Recuperar senha via email cadastrado"
@@ -33,3 +33,4 @@ summary:
   P0: 12
   P1: 6
   P2: 4
+```</pre>
