@@ -1,4 +1,4 @@
-# OBP.US-003-trace.md
+<pre>
 id: US-003
 epic: OBP
 title: "Recuperar senha via email cadastrado"
@@ -25,3 +25,4 @@ summary:
     high: 1
     medium: 0
     low: 0
+</pre>
