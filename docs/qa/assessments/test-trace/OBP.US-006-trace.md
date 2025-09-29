@@ -1,4 +1,4 @@
-# OBP.US-006-trace.md
+<pre>
 id: US-006
 epic: OBP
 title: "Criar novo projeto"
@@ -26,3 +26,4 @@ summary:
     high: 0
     medium: 1
     low: 0
+</pre>
