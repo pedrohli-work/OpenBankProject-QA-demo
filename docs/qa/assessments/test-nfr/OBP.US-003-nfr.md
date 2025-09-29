@@ -1,4 +1,4 @@
-# OBP.US-003-nfr.md
+<pre>
 id: US-003
 epic: OBP
 title: "Recuperar senha via email cadastrado"
@@ -23,3 +23,4 @@ summary:
   overall: "Pending"
   blockers:
     - "Falta teste de força de senha"
+</pre>
