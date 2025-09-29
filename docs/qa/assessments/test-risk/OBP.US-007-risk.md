@@ -1,4 +1,4 @@
-# OBP.US-007-risk.md
+<pre>
 id: US-007
 epic: OBP
 title: "Convidar usuários para um projeto"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Tokens de convite one-time"
   - "Rate limiting em convites"
   - "Retries para falha de entrega"
+</pre>
