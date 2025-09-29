@@ -1,4 +1,4 @@
-# OBP.US-018-nfr.md
+<pre>
 id: US-018
 epic: OBP
 title: "Configurar preferências de notificação"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Cobertura parcial para combinações de canais e múltiplos eventos (AC3)"
     - "Validações de escopo/mass assignment não totalmente testadas"
+</pre>
