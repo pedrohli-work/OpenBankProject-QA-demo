@@ -1,4 +1,4 @@
-# OBP.US-008-risk.md
+<pre>
 id: US-008
 epic: OBP
 title: "Definir papéis e permissões no projeto"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Auditoria de entitlements"
   - "Testes automáticos de roles"
   - "Alertas de inconsistências"
+</pre>
