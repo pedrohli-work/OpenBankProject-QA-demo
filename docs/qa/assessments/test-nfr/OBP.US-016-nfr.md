@@ -1,4 +1,4 @@
-# OBP.US-016-nfr.md
+<pre>
 id: US-016
 epic: OBP
 title: "Gerar relatórios de progresso do projeto"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Falta cobertura para injeção CSV (P1)"
     - "Ausência de teste de consistência durante geração concorrente (P2)"
+</pre>
