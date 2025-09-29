@@ -1,4 +1,4 @@
-# OBP.US-002-risk.md
+<pre>
 id: US-002
 epic: OBP
 title: "Login com autenticação segura"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Revisar lockout e monitoramento de brute force"
   - "Rotacionar chaves JWT com política definida"
   - "Validar tamanho e claims de tokens"
+</pre>
