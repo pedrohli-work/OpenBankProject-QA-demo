@@ -1,5 +1,4 @@
-# OBP.US-012-test-design.md
-<pre>```
+<pre>
 id: US-012
 epic: OBP
 date: 20250928
@@ -30,4 +29,4 @@ summary:
   P0: 9
   P1: 4
   P2: 3
-```</pre>
+</pre>
