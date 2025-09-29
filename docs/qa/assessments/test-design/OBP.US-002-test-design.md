@@ -1,4 +1,4 @@
-<pre> ```
+<pre>
 id: US-002
 epic: OBP
 date: 20250928
@@ -36,4 +36,4 @@ summary:
   P0: 14
   P1: 6
   P2: 4
-```</pre>
+</pre>
