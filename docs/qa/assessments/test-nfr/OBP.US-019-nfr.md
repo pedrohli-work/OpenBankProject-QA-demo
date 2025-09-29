@@ -1,4 +1,4 @@
-# OBP.US-019-nfr.md
+<pre>
 id: US-019
 epic: OBP
 title: "Visualizar histórico de atividades (audit log)"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Falta de políticas/implementação de redação de dados sensíveis (AC3)"
     - "Paginação com cursor ainda não validada sob rotação de eventos (AC1)"
+</pre>
