@@ -1,4 +1,4 @@
-# OBP.US-018-trace.md
+<pre>
 id: US-018
 epic: OBP
 title: "Configurar preferências de notificação"
@@ -29,3 +29,4 @@ summary:
     high: 1
     medium: 0
     low: 0
+</pre>
