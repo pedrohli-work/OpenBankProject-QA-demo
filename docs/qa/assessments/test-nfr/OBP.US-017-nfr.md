@@ -1,4 +1,4 @@
-# OBP.US-017-nfr.md
+<pre>
 id: US-017
 epic: OBP
 title: "Integrar com ferramentas externas (Google Drive, Slack)"
@@ -25,3 +25,4 @@ summary:
     - "Faltam testes de rotação/comprometimento de tokens (AC1)"
     - "Idempotência e backoff robustos em Drive/Slack (AC2/AC3)"
     - "Assinatura/validação de webhooks e revogação total (AC4)"
+</pre>
