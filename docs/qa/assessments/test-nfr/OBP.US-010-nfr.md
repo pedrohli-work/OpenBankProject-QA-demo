@@ -1,4 +1,4 @@
-# OBP.US-010-nfr.md
+<pre>
 id: US-010
 epic: OBP
 title: "Atribuir tarefas a membros do time"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Sem teste de notificação entregue (AC3)"
     - "Concorrência não coberta integralmente"
+</pre>
