@@ -1,4 +1,4 @@
-# OBP.US-017-risk.md
+<pre>
 id: US-017
 epic: OBP
 title: "Integrar com ferramentas externas (Google Drive, Slack)"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Armazenar tokens externos com criptografia"
   - "Retries + refresh de OAuth2"
   - "Fallback quando APIs externas falharem"
+</pre>
