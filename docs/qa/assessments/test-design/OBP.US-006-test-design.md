@@ -1,4 +1,5 @@
-<pre>```id: US-006
+<pre>```
+id: US-006
 epic: OBP
 date: 20250928
 title: "Criar novo projeto"
