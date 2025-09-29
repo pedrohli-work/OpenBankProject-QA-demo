@@ -1,4 +1,4 @@
-# OBP.US-018-risk.md
+<pre>
 id: US-018
 epic: OBP
 title: "Configurar preferências de notificação"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Validação estrita de preferências"
   - "Testes de sync em diferentes canais"
   - "Monitorar falhas de notificação"
+</pre>
