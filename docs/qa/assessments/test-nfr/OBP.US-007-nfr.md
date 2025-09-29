@@ -1,4 +1,4 @@
-# OBP.US-007-nfr.md
+<pre>
 id: US-007
 epic: OBP
 title: "Convidar usuários para um projeto"
@@ -23,3 +23,4 @@ summary:
   overall: "At Risk"
   blockers:
     - "Sem teste para convite expirado (AC4)"
+</pre>
