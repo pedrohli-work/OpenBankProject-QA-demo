@@ -1,4 +1,4 @@
-# OBP.US-004-nfr.md
+<pre>
 id: US-004
 epic: OBP
 title: "Editar perfil de usuário"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Falta teste de persistência pós-reload"
     - "Falta teste de mensagens de erro"
+</pre>
