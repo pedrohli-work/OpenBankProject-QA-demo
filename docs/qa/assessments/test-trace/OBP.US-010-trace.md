@@ -1,4 +1,4 @@
-# OBP.US-010-trace.md
+<pre>
 id: US-010
 epic: OBP
 title: "Atribuir tarefas a membros do time"
@@ -25,3 +25,4 @@ summary:
     high: 0
     medium: 1
     low: 0
+</pre>
