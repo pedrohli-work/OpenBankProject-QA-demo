@@ -1,4 +1,4 @@
-id: US-002
+<pre> ```id: US-002
 epic: OBP
 date: 20250928
 title: "Login com autenticação segura"
@@ -35,3 +35,4 @@ summary:
   P0: 14
   P1: 6
   P2: 4
+```</pre>
