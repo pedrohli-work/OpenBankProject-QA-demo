@@ -1,4 +1,4 @@
-# OBP.US-006-risk.md
+<pre>
 id: US-006
 epic: OBP
 title: "Criar novo projeto"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Owner obrigatório na criação"
   - "Monitoramento de indexação"
   - "Revisar entitlements de criação"
+</pre>
