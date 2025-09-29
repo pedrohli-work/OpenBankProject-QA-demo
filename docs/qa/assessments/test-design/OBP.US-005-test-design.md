@@ -1,4 +1,4 @@
-id: US-005
+<pre>```id: US-005
 epic: OBP
 date: 20250928
 title: "Visualizar dashboard inicial personalizado"
@@ -31,3 +31,4 @@ summary:
   P0: 14
   P1: 8
   P2: 3
+```</pre>
