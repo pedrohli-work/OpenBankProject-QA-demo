@@ -1,4 +1,4 @@
-# OBP.US-014-nfr.md
+<pre>
 id: US-014
 epic: OBP
 title: "Receber notificações em tempo real"
@@ -25,3 +25,4 @@ summary:
     - "Validação de SLO sob carga/fanout (AC1) ainda não coberta"
     - "Testes de isolamento por projeto/tenant em cenários limite (AC2)"
     - "Deduplicação multi-aba/dispositivo após reconexão (AC3)"
+</pre>
