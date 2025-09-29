@@ -1,4 +1,4 @@
-id: US-004
+<pre>```id: US-004
 epic: OBP
 date: 20250928
 title: "Editar perfil de usuário"
@@ -33,3 +33,4 @@ summary:
   P0: 12
   P1: 7
   P2: 4
+```</pre>
