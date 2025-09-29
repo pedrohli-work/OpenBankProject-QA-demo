@@ -1,4 +1,4 @@
-# OBP.US-005-nfr.md
+<pre>
 id: US-005
 epic: OBP
 title: "Visualizar dashboard inicial personalizado"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Falta teste de isolamento de dados (AC4)"
     - "Métricas e tracing ausentes"
+</pre>
