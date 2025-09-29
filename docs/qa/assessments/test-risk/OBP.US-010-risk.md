@@ -1,4 +1,4 @@
-# OBP.US-010-risk.md
+<pre>
 id: US-010
 epic: OBP
 title: "Atribuir tarefas a membros do time"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Validação de papéis antes da atribuição"
   - "Locks otimistas em concorrência"
   - "Retries em fila de notificações"
+</pre>
