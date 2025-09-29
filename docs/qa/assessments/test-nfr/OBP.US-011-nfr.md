@@ -1,4 +1,4 @@
-# OBP.US-011-nfr.md
+<pre>
 id: US-011
 epic: OBP
 title: "Atualizar status de tarefas (To Do, Doing, Done)"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Teste de concorrência (double update) com lock otimista ausente (AC3)"
     - "Eventos/telemetria task_status_changed ainda não implementados"
+</pre>
