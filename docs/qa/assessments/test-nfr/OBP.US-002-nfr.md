@@ -1,4 +1,4 @@
-# OBP.US-002-nfr.md
+<pre>
 id: US-002
 epic: OBP
 title: "Login com autenticação segura"
@@ -23,3 +23,4 @@ summary:
   overall: "Pending"
   blockers:
     - "Falta teste de expiração JWT"
+</pre>
