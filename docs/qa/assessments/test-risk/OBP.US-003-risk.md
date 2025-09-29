@@ -1,4 +1,4 @@
-# OBP.US-003-risk.md
+<pre>
 id: US-003
 epic: OBP
 title: "Recuperar senha via email cadastrado"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Neutral response em forgot password"
   - "Tokens one-time + TTL estrito"
   - "Monitoramento de entregas de email"
+</pre>
