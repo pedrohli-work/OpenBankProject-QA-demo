@@ -1,4 +1,4 @@
-# OBP.US-001-nfr.md
+<pre>
 id: US-001
 epic: OBP
 title: "Autenticar via Direct Login e validar users/current"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Falta teste de logs mascarados"
     - "Falta teste de retries/backoff"
+</pre>
