@@ -1,4 +1,4 @@
-# OBP.US-001-risk.md
+<pre>
 id: US-001
 epic: OBP
 title: "Autenticar via Direct Login e validar users/current"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Implementar masking obrigatório em logs"
   - "Configurar retry/backoff com limites"
   - "Marcar testes reais como @integration"
+</pre>
