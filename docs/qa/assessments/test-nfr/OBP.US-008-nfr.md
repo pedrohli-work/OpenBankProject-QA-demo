@@ -1,4 +1,4 @@
-# OBP.US-008-nfr.md
+<pre>
 id: US-008
 epic: OBP
 title: "Definir papéis e permissões no projeto"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Sem teste de propagação imediata (AC3)"
     - "Logs de auditoria não validados"
+</pre>
