@@ -1,4 +1,4 @@
-# OBP.US-015-nfr.md
+<pre>
 id: US-015
 epic: OBP
 title: "Pesquisar tarefas, projetos e usuários"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Teste de vazamento em filtros compostos (AC2) ainda ausente"
     - "Sem validação de relevância com fuzzy/typo-boost (AC1)"
+</pre>
