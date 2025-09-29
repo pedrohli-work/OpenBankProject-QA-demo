@@ -1,4 +1,4 @@
-# OBP.US-005-risk.md
+<pre>
 id: US-005
 epic: OBP
 title: "Visualizar dashboard inicial personalizado"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Adicionar paginação e cache em agregadores"
   - "Testes de isolamento entre usuários"
   - "Fallback por widget no dashboard"
+</pre>
