@@ -1,4 +1,4 @@
-# OBP.US-014-risk.md
+<pre>
 id: US-014
 epic: OBP
 title: "Receber notificações em tempo real"
@@ -15,3 +15,4 @@ acoes_recomendadas:
   - "Escalar infraestrutura para conexões"
   - "Fallback de polling"
   - "Filtrar eventos por escopo"
+</pre>
