@@ -1,4 +1,4 @@
-# OBP.US-006-nfr.md
+<pre>
 id: US-006
 epic: OBP
 title: "Criar novo projeto"
@@ -24,3 +24,4 @@ summary:
   blockers:
     - "Sem E2E de visibilidade (AC3)"
     - "Audit log não verificado"
+</pre>
