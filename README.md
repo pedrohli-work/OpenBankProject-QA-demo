@@ -10,12 +10,12 @@ This repository is a **mini QA project** built to learn, practice and demonstrat
 - Show that test design is **not a “seven-headed beast”**, but a clear and systematic process.
 
 ## 🗂 Repository structure
-docs
-user-stories/ → functional user stories (US-001, US-002…)
-test-design/ → manual test cases, strategies
-test-nfr/ → non-functional test definitions
-test-risk/ → risk analysis for each US
-test-trace/ → traceability matrices
+- docs
+- user-stories/ → functional user stories (US-001, US-002…)
+- test-design/ → manual test cases, strategies
+- test-nfr/ → non-functional test definitions
+- test-risk/ → risk analysis for each US
+- test-trace/ → traceability matrices
 
 📖 Why this project?
 
