@@ -28,13 +28,13 @@ This mini project shows how to:
 ┣ Test Design Techniques (EP, BVA, DT, ST)  
  ┣ Risk-Based Testing (P0/P1/P2)  
  ┗ QA Thinking Framework (7 lenses)    
-      ┣ Happy path      
-      ┣ Validations  
-      ┣ States  
-      ┣ Errors  
-      ┣ UI/UX  
-      ┣ Integrations  
-      ┗ Compatibility  
+     - ┣ Happy path      
+     - ┣ Validations  
+     - ┣ States  
+     - ┣ Errors  
+     - ┣ UI/UX  
+     - ┣ Integrations  
+     - ┗ Compatibility  
 
 ## 📌 Objectives
 - Apply **QA Lens**
