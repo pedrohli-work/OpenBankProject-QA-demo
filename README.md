@@ -1,7 +1,12 @@
-# QA Test Design – Open Bank Project (OBP)
+# Open Bank Project(OBP) - QA API Demo
 
-This repository is a **mini QA project** built to learn, practice and demonstrate
-**test design for APIs** using the [Open Bank Project (OBP) Sandbox](https://openbankproject.com/).
+This repository is a **mini QA project** built to learn, practice and demonstrate Quality Assurance Engineering for APIs 
+using the [Open Bank Project (OBP) Sandbox](https://openbankproject.com/).
+
+### Manual + API QA | Postman |
+![Postman](https://img.shields.io/badge/Postman-API%20Testing-orange)
+![Status](https://img.shields.io/badge/All%20Tests-Passed-green)
+![OBP](https://img.shields.io/badge/OpenBankProject-Sandbox-blue)
 
 ## 📌 Objectives
 - Practice **manual end-to-end testing** of REST APIs.
