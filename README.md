@@ -8,6 +8,21 @@ Quality Assurance Engineering for APIs using the [Open Bank Project (OBP) Sandbo
 ![Status](https://img.shields.io/badge/All%20Tests-Passed-green)
 ![OBP](https://img.shields.io/badge/OpenBankProject-Sandbox-blue)
 
+openbankproject-qa-demo/  
+ ┣ 📁 docs/  
+ ┃ ┣ 📘 Test_Plan_OpenBankProject.pdf    
+ ┃ ┣ 📊 Test_Scenarios.xlsx    
+ ┃ ┗ 🧩 Test_Cases.xlsx    
+ ┣ 📁 postman/  
+ ┃ ┣ 🧪 OBP_Collection.json  
+ ┃ ┗ ⚙️ OBP_Environment.json  
+ ┣ 📁 screenshots/  
+ ┃ ┣ 🔑 directlogin_token.png  
+ ┃ ┣ 🧠 sandbox_tan_challenge.png  
+ ┃ ┣ ✅ completed_payment.png  
+ ┃ ┗ 💰 reconciliation_balance.png  
+ ┣ 📄 README.md  
+
 📖 Why this project?
 
 Because QA is not just about clicking buttons.  
