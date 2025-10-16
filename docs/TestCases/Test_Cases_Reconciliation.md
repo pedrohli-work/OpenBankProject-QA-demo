@@ -19,13 +19,13 @@ debit must be reflected in source balance.
 **Pre-requisites:**  
 A SEPA (or SIMPLE) payment completed successfully. 
 Postman environment set: 
-host, 
-DL_TOKEN, 
-bank_id, 
-account_id, 
-view_id=owner, 
-amount, 
-currency.
+- host, 
+- DL_TOKEN, 
+- bank_id, 
+- account_id, 
+- view_id=owner, 
+- amount, 
+- currency.
 
 **Test Steps:**  
 1. Call GET Balance for the source account 
@@ -34,12 +34,12 @@ after the successful payment.
 prior to payment (if stored) or verify that the debit equals amount.
 
 **Test Data:**  
-amount="{{amount}}", 
-currency="{{currency}}"
+- amount="{{amount}}", 
+- currency="{{currency}}"
 
 **Expected Result:**  
-ER-1: Response 200 with a valid balance object.
-ER-2: Balance decreased by the payment amount in the same currency.
+ER-1: Response 200 with a valid balance object.  
+ER-2: Balance decreased by the payment amount in the same currency.  
 ER-3: No sign/currency inconsistencies.
 
 </details>
@@ -66,14 +66,14 @@ and description used when creating the payment.
 currency, and description match the created payment.
 
 **Test Data:**  
-amount="{{amount}}", 
-currency="{{currency}}", 
-description contains your payment note.
+- amount="{{amount}}", 
+- currency="{{currency}}", 
+- description contains your payment note.
 
 **Expected Result:**  
-ER-1: Response 200 with a transactions list.
+ER-1: Response 200 with a transactions list.  
 ER-2: One entry matches the payment with correct amount, 
-currency, and description.
+currency, and description.  
 ER-3: If provided by API, linkage to transaction_request_id is present.
 
 </details>
@@ -100,13 +100,13 @@ proper view_id/permissions for destination.
 3. Verify credit amount and presence of the new transaction.
 
 **Test Data:**  
-Same amount/currency as payment; 
-destination account identifiers.
+- Same amount/currency as payment; 
+- destination account identifiers.
 
 **Expected Result:**  
-ER-1: Destination balance increased by amount.
+ER-1: Destination balance increased by amount.  
 ER-2: A corresponding credit transaction appears 
-with correct currency and description.
+with correct currency and description.  
 ER-3: No currency mismatch.
 
 </details>
@@ -131,11 +131,11 @@ that include the payment timestamp
 (from = payment-time − 1h; to = payment-time + 1h).
 
 **Test Data:**  
-Date range enclosing the payment time.
+- Date range enclosing the payment time.
 
 **Expected Result:**  
-ER-1: Response 200 with a filtered list.
-ER-2: The payment transaction is returned within the range.
+ER-1: Response 200 with a filtered list.  
+ER-2: The payment transaction is returned within the range.  
 ER-3: No transactions outside the range are included.
 
 </details>
@@ -160,10 +160,10 @@ Transactions for the source account.
 2. Verify ISO currency codes match the payment’s currency.
 
 **Test Data:**  
-currency="{{currency}}"
+- currency="{{currency}}"
 
 **Expected Result:**  
-ER-1: Transaction currency equals the payment currency.
+ER-1: Transaction currency equals the payment currency.  
 ER-2: Balance currency uses the same 
 ISO code and does not conflict with transaction currency.
 
@@ -191,12 +191,11 @@ GET Transactions for the source account.
 2. Compare with pre-failure state (or confirm absence of new related entries).
 
 **Test Data:**  
-Reference the failed 
-transaction_request_id if available.
+- Reference the failed transaction_request_id if available.
 
 **Expected Result:**  
-ER-1: No balance change attributable to the failed request.
-ER-2: No new transaction records created for the failed request.
+ER-1: No balance change attributable to the failed request.  
+ER-2: No new transaction records created for the failed request.  
 ER-3: Status endpoint of the failed request provides informative error.
 
 </details>

@@ -17,17 +17,18 @@ Payment Initiation (SEPA)
 creation without challenge.
 
 **Pre-requisites:**  
-Postman with environment variables set 
-(host, 
-consumer_key, 
-username, password, 
-DL_TOKEN, 
-bank_id, 
-account_id, 
-view_id=owner, 
-currency=EUR, 
-amount=1.00, 
-description). 
+Postman with environment variables set: 
+- host, 
+- consumer_key, 
+- username,
+- password, 
+- DL_TOKEN, 
+- bank_id, 
+- account_id, 
+- view_id=owner, 
+- currency=EUR, 
+- amount=1.00, 
+- description. 
 
 Valid DirectLogin token available or included in steps.
 
@@ -38,18 +39,17 @@ Valid DirectLogin token available or included in steps.
 4. Send GET to retrieve transaction request status.
 
 **Test Data:**  
-Headers: Authorization: 
-DirectLogin token={{DL_TOKEN}}, 
-Content-Type: application/json
+Headers: Authorization: DirectLogin token={{DL_TOKEN}},  
+Content-Type: application/json  
 Body:
-json<br>{ "to": {"iban": "DE91100000000123456789"}, 
-"value": {"currency": "EUR","amount": "1.00"}, 
-"description": "{{description}}", 
+json<br>{ "to": {"iban": "DE91100000000123456789"},  
+"value": {"currency": "EUR","amount": "1.00"},  
+"description": "{{description}}",  
 "charge_policy": "SHARED" }
 
 **Expected Result:**  
-ER-1: API returns 201/200 with a valid transaction_request_id.
-ER-2: Response contains correct amount and currency.
+ER-1: API returns 201/200 with a valid transaction_request_id.  
+ER-2: Response contains correct amount and currency.  
 ER-3: GET status shows INITIATED or COMPLETED.
 
 </details>
@@ -81,8 +81,8 @@ Body same as TC_PI_001.
 TAN: "123456" when requested.
 
 **Expected Result:**  
-ER-1: Response includes transaction_request_id and challenge.
-ER-2: TAN submission accepted (HTTP 2xx).
+ER-1: Response includes transaction_request_id and challenge.  
+ER-2: TAN submission accepted (HTTP 2xx).  
 ER-3: Status transitions from PENDING_CHALLENGE to COMPLETED.
 
 </details>
@@ -110,8 +110,8 @@ Sandbox returning challenge object.
 Invalid TAN: "", "abc". Valid TAN: "123456".
 
 **Expected Result:**  
-ER-1: Invalid TAN returns 4xx with validation error.
-ER-2: Correct TAN returns 2xx.
+ER-1: Invalid TAN returns 4xx with validation error.  
+ER-2: Correct TAN returns 2xx.  
 ER-3: Status progresses to COMPLETED.
 
 </details>
@@ -138,8 +138,8 @@ Postman ready; invalid login credentials.
 Wrong username or password.
 
 **Expected Result:**  
-ER-1: DirectLogin fails with 401/403.
-ER-2: SEPA request fails with 401 Unauthorized.
+ER-1: DirectLogin fails with 401/403.  
+ER-2: SEPA request fails with 401 Unauthorized.  
 ER-3: No transaction request is created.
 
 </details>
@@ -167,7 +167,7 @@ Expired or manually invalidated DL_TOKEN.
 Invalid token replaced by valid one.
 
 **Expected Result:**  
-ER-1: First attempt 401 Unauthorized.
+ER-1: First attempt 401 Unauthorized.  
 ER-2: Second attempt 201/200 with valid transaction_request_id.
 
 </details>
@@ -193,7 +193,7 @@ Valid token.
 to.iban = "DE001234"
 
 **Expected Result:**  
-ER-1: API returns 4xx with IBAN validation message.
+ER-1: API returns 4xx with IBAN validation message.  
 ER-2: No transaction request created.
 
 </details>
@@ -216,10 +216,11 @@ Valid token.
 1. POST SEPA create with "currency": "USD".
 
 **Test Data:**  
-currency = "USD", amount = "1.00".
+- currency = "USD",
+- amount = "1.00".
 
 **Expected Result:**  
-ER-1: API returns 4xx error indicating unsupported currency.
+ER-1: API returns 4xx error indicating unsupported currency.  
 ER-2: No transaction created.
 
 </details>
@@ -246,7 +247,7 @@ Valid token.
 0.00 and -1.00.
 
 **Expected Result:**  
-ER-1: API rejects with 4xx validation error.
+ER-1: API rejects with 4xx validation error.  
 ER-2: No transaction request ID generated.
 
 </details>
@@ -274,8 +275,8 @@ None.
 Headers/bodies intentionally incomplete.
 
 **Expected Result:**  
-ER-1: Missing Authorization → 401 Unauthorized.
-ER-2: Missing body fields → 4xx validation error.
+ER-1: Missing Authorization → 401 Unauthorized.  
+ER-2: Missing body fields → 4xx validation error.  
 ER-3: No transaction created.
 
 </details>
@@ -301,7 +302,7 @@ Valid token.
 String of 2001+ characters.
 
 **Expected Result:**  
-ER-1: API returns 4xx error for description length violation.
+ER-1: API returns 4xx error for description length violation.  
 ER-2: No transaction request ID generated.
 
 </details>
@@ -328,7 +329,7 @@ sandbox supports future_date.
 Future date field included.
 
 **Expected Result:**  
-ER-1: API returns 201/200 accepting request.
+ER-1: API returns 201/200 accepting request.  
 ER-2: Status shows scheduled initiation (INITIATED or equivalent).
 
 </details>
@@ -353,10 +354,9 @@ account and view accessible.
 2. Confirm SEPA listed.
 
 **Test Data:**  
-None.
 
 **Expected Result:**  
-ER-1: Response 200 lists SEPA as available type.
+ER-1: Response 200 lists SEPA as available type.  
 ER-2: If missing, execution marked blocked by environment.
 
 </details>
