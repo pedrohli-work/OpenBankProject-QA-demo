@@ -1,0 +1,5186 @@
+{
+	"info": {
+		"_postman_id": "c9f1f5b0-2c34-4deb-8a17-e7951d6bd816",
+		"name": "OBP Sandbox - Manual API QA",
+		"description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49239708",
+		"_collection_link": "https://pedro-h-li-work-5503722.postman.co/workspace/PedroLi's-Workspace~e2c22897-3dac-4c5f-8a96-9920cbbdc8a7/collection/49239708-c9f1f5b0-2c34-4deb-8a17-e7951d6bd816?action=share&source=collection_link&creator=49239708"
+	},
+	"item": [
+		{
+			"name": "00_Auth",
+			"item": [
+				{
+					"name": "Create Bank",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"200/201 DirectLogin\", () => pm.expect([200,201]).to.include(pm.response.code));\r",
+											"const t = pm.response.json().token;\r",
+											"pm.environment.set(\"DL_TOKEN\", t);\r",
+											"pm.test(\"DL_TOKEN salvo\", () => pm.expect(pm.environment.get(\"DL_TOKEN\")).to.exist);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Bank",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"201 Created Bank\", () => pm.expect([200,201]).to.include(pm.response.code));\r",
+											"const bank = pm.response.json();\r",
+											"pm.environment.set(\"bank_id\", bank.id || \"qa-demo-bank-01\");\r",
+											"pm.test(\"BANK_ID salvo\", () => pm.expect(pm.environment.get(\"bank_id\")).to.exist);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"id\": \"qa-demo-bank-01\",\r\n  \"full_name\": \"QA Demo Bank 01\",\r\n  \"logo\": \"https://example.com/logo.png\",\r\n  \"website\": \"https://example.com\",\r\n  \"bank_routings\": [\r\n    { \"scheme\": \"OBP\", \"address\": \"QA-DEMO-01\" }\r\n  ]\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v5.1.0/banks",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v5.1.0",
+										"banks"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Entitlement Request",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"bank_id\": \"\",\r\n  \"role_name\": \"CanCreateBank\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v3.0.0/entitlement-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v3.0.0",
+										"entitlement-requests"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 200/201\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+									"",
+									"// Tenta ler JSON com segurança",
+									"let body = {};",
+									"try { body = pm.response.json(); } catch(e) { body = {}; }",
+									"",
+									"pm.test(\"Token presente no corpo\", () => pm.expect(body).to.have.property(\"token\"));",
+									"",
+									"if (body.token) {",
+									"  pm.environment.set(\"dl_token\", body.token);",
+									"  pm.environment.set(\"dl_token_ts\", Date.now()); // timestamp de emissão",
+									"  console.log(\"Token salvo:\", body.token);",
+									"} else {",
+									"  console.warn(\"Sem token na resposta.\");",
+									"}",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key=\"{{consumer_key}}\"",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Add your name in the body\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/my/logins/direct",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"my",
+								"logins",
+								"direct"
+							]
+						},
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "My accounts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK - my accounts\", () => pm.response.to.have.status(200));\r",
+									"const body = pm.response.json() || {};\r",
+									"const accs = body.accounts || body || [];\r",
+									"pm.test(\"Tenho ao menos 1 conta\", () => pm.expect(accs.length).to.be.above(0));\r",
+									"\r",
+									"// pega a primeira conta que tenha view 'owner' (ou qualquer view)\r",
+									"let chosen = null;\r",
+									"for (const a of accs) {\r",
+									"  const views = (a.views_available || []).map(v => v.id);\r",
+									"  if (views.includes(\"owner\")) { chosen = { bank_id: a.bank_id, account_id: a.id, view_id: \"owner\" }; break; }\r",
+									"}\r",
+									"// fallback: se não achar 'owner', usa a 1ª view disponível (apenas para leitura; não cria pagamento)\r",
+									"if (!chosen) {\r",
+									"  const a = accs[0];\r",
+									"  const views = (a.views_available || []);\r",
+									"  if (views.length) chosen = { bank_id: a.bank_id, account_id: a.id, view_id: views[0].id };\r",
+									"}\r",
+									"\r",
+									"pm.environment.set(\"bank_id\", chosen.bank_id);\r",
+									"pm.environment.set(\"account_id\", chosen.account_id);\r",
+									"pm.environment.set(\"view_id\", chosen.view_id);\r",
+									"console.log(\"USANDO => bank_id:\", chosen.bank_id, \"account_id:\", chosen.account_id, \"view_id:\", chosen.view_id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/obp/v5.1.0/my/accounts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"obp",
+								"v5.1.0",
+								"my",
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "01_Smoke",
+			"item": [
+				{
+					"name": "/obp/v5.0.0/root",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"Response is JSON\", () => pm.response.to.be.json);\r",
+									"\r",
+									"let body = {};\r",
+									"try { body = pm.response.json(); } catch (e) {}\r",
+									"\r",
+									"pm.test('\"version\" field exists', () => {\r",
+									"  pm.expect(body).to.have.property(\"version\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "DirectLogin token={{dl_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/obp/v5.0.0/root",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"obp",
+								"v5.0.0",
+								"root"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/obp/v3.1.0/banks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"Response is JSON\", () => pm.response.to.be.json);\r",
+									"\r",
+									"let body = {};\r",
+									"try { body = pm.response.json(); } catch (e) {}\r",
+									"\r",
+									"pm.test('\"banks\" array is present', () => {\r",
+									"  pm.expect(body).to.have.property(\"banks\").that.is.an(\"array\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "DirectLogin token={{dl_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/obp/v3.1.0/banks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"obp",
+								"v3.1.0",
+								"banks"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TS_002-Payment Initiation",
+			"item": [
+				{
+					"name": "TC_PI_001-Validate SEPA No Challenge",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"200/201 DirectLogin\", () => pm.expect([200,201]).to.include(pm.response.code));\r",
+											"\r",
+											"let body = {};\r",
+											"try { body = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Token presente\", () => pm.expect(body).to.have.property(\"token\"));\r",
+											"\r",
+											"if (body.token) {\r",
+											"  pm.environment.set(\"DL_TOKEN\", body.token);\r",
+											"} else {\r",
+											"  throw new Error(\"Sem token na resposta do DirectLogin\");\r",
+											"}\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": {\r\n    \"bank_id\": \"{{bank_id}}\",\r\n    \"account_id\": \"{{account_id}}\"\r\n  },\r\n  \"value\": {\r\n    \"currency\": \"EUR\",\r\n    \"amount\": \"5.00\"\r\n  },\r\n  \"description\": \"Pagamento SIMPLE demo\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Transaction Request - SEPA",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"200/201 Create SEPA\", () => pm.expect([200,201]).to.include(pm.response.code));\r",
+											"\r",
+											"let res = {};\r",
+											"try { res = pm.response.json(); } catch(e) {}\r",
+											"\r",
+											"pm.environment.set(\"transaction_request_id\", res.transaction_request_id);\r",
+											"pm.test(\"transaction_request_id presente\", () => pm.expect(pm.environment.get(\"transaction_request_id\")).to.exist);\r",
+											"\r",
+											"// valida campos principais\r",
+											"pm.test(\"Moeda/valor corretos\", () => {\r",
+											"  pm.expect(res.value.currency).to.eql(\"EUR\");\r",
+											"  pm.expect(String(res.value.amount)).to.eql(\"1.00\");\r",
+											"});\r",
+											"\r",
+											"// Este TC é NO CHALLENGE. Se aparecer challenge, apenas avisa (não falha o caso).\r",
+											"if (res.challenge) console.warn(\"Sandbox retornou challenge; este TC é sem challenge.\");\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"iban\": \"DE91100000000123456789\" },\r\n  \"value\": { \"currency\": \"{{currency}}\", \"amount\": \"{{amount}}\" },\r\n  \"description\": \"{{description}}\",\r\n  \"charge_policy\": \"SHARED\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v5.1.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v5.1.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Transaction Request Status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"200 Status\", () => pm.response.to.have.status(200));\r",
+											"let st = \"\";\r",
+											"try { st = pm.response.json().status; } catch(e) {}\r",
+											"pm.test(\"Status INITIATED ou COMPLETED\", () => {\r",
+											"  pm.expect([\"INITIATED\",\"COMPLETED\"]).to.include(st);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v5.1.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}?",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v5.1.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_002-Validate SEPA with Challenge",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"201 Created\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token capturado\", () => \r",
+											"pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Transaction Request - SANDBOX_TAN",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"pm.test(\"201/202 e PENDING_CHALLENGE\", () => {\r",
+											"  pm.expect([200,201,202]).to.include(pm.response.code);\r",
+											"  pm.expect(res.status).to.eql(\"PENDING_CHALLENGE\");\r",
+											"});\r",
+											"pm.environment.set(\"transaction_request_id\", res.transaction_request_id);\r",
+											"pm.environment.set(\"challenge_id\", res.challenge && res.challenge.id);\r",
+											"pm.test(\"IDs capturados\", () => {\r",
+											"  pm.expect(pm.environment.get(\"transaction_request_id\")).to.be.ok;\r",
+											"  pm.expect(pm.environment.get(\"challenge_id\")).to.be.ok;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"bank_id\": \"{{bank_id}}\", \"account_id\": \"{{to_account_id}}\" },\r\n  \"value\": { \"currency\": \"EUR\", \"amount\": \"10.00\" },\r\n  \"description\": \"QA Demo Payment - TAN\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SANDBOX_TAN/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SANDBOX_TAN",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Answer Challenge - TAN",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Pagamento completado\", () => {\r",
+											"  pm.expect(pm.response.json().status).to.eql(\"COMPLETED\");\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"{{challenge_id}}\", \"answer\": \"123\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}/challenge",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}",
+										"challenge"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Transaction Request Status",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_003-Validate challenge error handling",
+					"item": [
+						{
+							"name": "DirectLogin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"201 Created\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token captured\", () => pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}, password=\"{{password}}, consumer_key={{consumer_key}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transaction Request",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Accepted with Challenge (201/202)\", () => {\r",
+											"  pm.expect([200,201,202]).to.include(pm.response.code);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Initial Status is PENDING_CHALLENGE\", () => {\r",
+											"  pm.expect(res.status).to.eql(\"PENDING_CHALLENGE\");\r",
+											"});\r",
+											"\r",
+											"pm.environment.set(\"transaction_request_id\", res.transaction_request_id);\r",
+											"pm.environment.set(\"challenge_id\", res.challenge && res.challenge.id);\r",
+											"\r",
+											"pm.test(\"IDs Captured (TR & Challenge)\", () => {\r",
+											"  pm.expect(pm.environment.get(\"transaction_request_id\")).to.be.ok;\r",
+											"  pm.expect(pm.environment.get(\"challenge_id\")).to.be.ok;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"bank_id\": \"{{bank_id}}\", \"account_id\": \"{{to_account_id}}\" },\r\n  \"value\": { \"currency\": \"EUR\", \"amount\": \"10.00\" },\r\n  \"description\": \"PI_003 - Challenge flow\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SANDBOX_TAN/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SANDBOX_TAN",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Answer Challenge Invalid TAN",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Invalid/Missing TAN Returns Client Error\", () => {\r",
+											"  pm.response.to.have.status.within(400, 499);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response Mentions Validation/Challenge Error (Best-Effort)\", () => {\r",
+											"  const txt = JSON.stringify(pm.response.json() || {}).toUpperCase();\r",
+											"  pm.expect(txt).to.satisfy(t => t.includes(\"INVALID\") || t.includes(\"CHALLENGE\") || t.includes(\"TAN\"));\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"{{challenge_id}}\", \"answer\": \"abc\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}/challenge",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}",
+										"challenge"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Answer Challenge Valid TAN",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Challenge Answer Accepted (200 OK)\", () => {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Final Status is COMPLETED\", () => {\r",
+											"  pm.expect(pm.response.json().status).to.eql(\"COMPLETED\");\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"{{challenge_id}}\", \"answer\": \"123\" }\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}/challenge",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}",
+										"challenge"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Status Confirmation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status Endpoint Available (200 OK)\", () => {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Terminal Status Is Valid\", () => {\r",
+											"  pm.expect([\"COMPLETED\",\"FAILED\"]).to.include(pm.response.json().status);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_004-Validate Authentication Failure",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Authentication Rejected (401/403)\", () => {\r",
+											"  pm.expect([401,403]).to.include(pm.response.code);\r",
+											"});\r",
+											"pm.test(\"No Token Captured\", () => {\r",
+											"  const token = _.get(pm.response.json(), \"token\");\r",
+											"  pm.expect(token).to.be.undefined;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"wrong_user\", password=\"wrong_pass\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "SEPA without valid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Unauthorized Without Valid Token (401)\", () => {\r",
+											"  pm.response.to.have.status(401);\r",
+											"});\r",
+											"pm.test(\"No Transaction Request Created\", () => {\r",
+											"  const res = pm.response.json() || {};\r",
+											"  // Verificação best-effort: não deve haver id de request\r",
+											"  pm.expect(res.transaction_request_id || res.id).to.be.oneOf([undefined, null, \"\"]);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"iban\": \"DE91100000000123456789\" },\r\n  \"value\": { \"currency\": \"EUR\", \"amount\": \"1.00\" },\r\n  \"description\": \"PI_004 - should fail without token\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_005-Validate expired Direct Login",
+					"item": [
+						{
+							"name": "Direct Login expired token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Unauthorized with Expired/Invalid Token (401)\", () => {\r",
+											"  pm.response.to.have.status(401);\r",
+											"});\r",
+											"pm.test(\"No Transaction Request Created\", () => {\r",
+											"  const res = pm.response.json() || {};\r",
+											"  pm.expect(res.transaction_request_id || res.id).to.be.oneOf([undefined, null, \"\"]);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"iban\": \"DE91100000000123456789\" },\r\n  \"value\": { \"currency\": \"EUR\", \"amount\": \"1.00\" },\r\n  \"description\": \"PI_005 - attempt with expired token\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Renew token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"New Token Issued (201)\", () => {\r",
+											"  pm.response.to.have.status(201);\r",
+											"});\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token Captured to Environment\", () => {\r",
+											"  pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}, password=\"{{password}}, consumer_key={{consumer_key}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Retry with renew token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json() || {};\r",
+											"pm.test(\"Creation Succeeds After Renewal (200/201)\", () => {\r",
+											"  pm.expect([200,201]).to.include(pm.response.code);\r",
+											"});\r",
+											"pm.test(\"Transaction Request ID Present\", () => {\r",
+											"  pm.expect(res.transaction_request_id).to.be.a(\"string\").and.not.empty;\r",
+											"});\r",
+											"pm.test(\"Response Echoes Amount/Currency\", () => {\r",
+											"  pm.expect(res.value.currency).to.eql(\"EUR\");\r",
+											"  pm.expect(String(res.value.amount)).to.match(/^1(\\.00)?$/);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{dl_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Initial State status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status Endpoint Available (200)\", () => {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"pm.test(\"Initial Status Is INITIATED or COMPLETED\", () => {\r",
+											"  pm.expect([\"INITIATED\",\"COMPLETED\",\"PENDING_CHALLENGE\"])\r",
+											"    .to.include(pm.response.json().status);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_006-Validate invalid IBAN",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"201 Created (Token Issued)\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token Captured\", () => pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}, password=\"{{password}}, consumer_key={{consumer_key}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create SEPA with invalid IBAN",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json() || {};\r",
+											"\r",
+											"pm.test(\"Client Error for Invalid IBAN (4xx)\", () => {\r",
+											"  pm.response.to.have.status.within(400, 499);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Validation Mentions IBAN (Best-Effort)\", () => {\r",
+											"  const t = JSON.stringify(res).toUpperCase();\r",
+											"  pm.expect(t).to.satisfy(s => s.includes(\"IBAN\") || s.includes(\"INVALID\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No Transaction Request Is Created\", () => {\r",
+											"  pm.expect(res.transaction_request_id || res.id).to.be.oneOf([undefined, null, \"\"]);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{dl_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"iban\": \"DE001234\" },\r\n  \"value\": { \"currency\": \"EUR\", \"amount\": \"1.00\" },\r\n  \"description\": \"PI_006 - invalid IBAN\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_007-Validate non-EUR currency",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"201 Created (Token Issued)\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token Captured\", () => pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create SEPA with USD",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json() || {};\r",
+											"\r",
+											"pm.test(\"Client Error for Non-EUR Currency (4xx)\", () => {\r",
+											"  pm.response.to.have.status.within(400, 499);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error Mentions Unsupported Currency (Best-Effort)\", () => {\r",
+											"  const t = JSON.stringify(res).toUpperCase();\r",
+											"  pm.expect(t).to.satisfy(s =>\r",
+											"    s.includes(\"CURRENCY\") || s.includes(\"UNSUPPORTED\") || s.includes(\"EUR\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No Transaction Request Created\", () => {\r",
+											"  pm.expect(res.transaction_request_id || res.id).to.be.oneOf([undefined, null, \"\"]);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{dl_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"iban\": \"DE91100000000123456789\" },\r\n  \"value\": { \"currency\": \"USD\", \"amount\": \"1.00\" },\r\n  \"description\": \"{{description}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_008-Validate Zero or Negative amounts",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"201 Created (Token Issued)\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token Captured\", () => pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}, password=\"{{password}}, consumer_key={{consumer_key}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "SEPA with zero amount",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json() || {};\r",
+											"\r",
+											"pm.test(\"Client Error for Zero Amount (4xx)\", () => {\r",
+											"  pm.response.to.have.status.within(400, 499);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Validation Mentions Amount (Best-Effort)\", () => {\r",
+											"  const t = JSON.stringify(res).toUpperCase();\r",
+											"  pm.expect(t).to.satisfy(s => s.includes(\"AMOUNT\") || s.includes(\"ZERO\") || s.includes(\"INVALID\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No Transaction Request Created (Zero)\", () => {\r",
+											"  pm.expect(res.transaction_request_id || res.id).to.be.oneOf([undefined, null, \"\"]);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{dl_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"iban\": \"DE91100000000123456789\" },\r\n  \"value\": { \"currency\": \"EUR\", \"amount\": \"0.00\" },\r\n  \"description\": \"PI_008 - zero amount\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "SEPA with negative amount",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json() || {};\r",
+											"\r",
+											"pm.test(\"Client Error for Negative Amount (4xx)\", () => {\r",
+											"  pm.response.to.have.status.within(400, 499);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Validation Mentions Amount Sign (Best-Effort)\", () => {\r",
+											"  const t = JSON.stringify(res).toUpperCase();\r",
+											"  pm.expect(t).to.satisfy(s => s.includes(\"AMOUNT\") || s.includes(\"NEGATIVE\") || s.includes(\"INVALID\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No Transaction Request Created (Negative)\", () => {\r",
+											"  pm.expect(res.transaction_request_id || res.id).to.be.oneOf([undefined, null, \"\"]);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{dl_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"iban\": \"DE91100000000123456789\" },\r\n  \"value\": { \"currency\": \"EUR\", \"amount\": \"-1.00\" },\r\n  \"description\": \"PI_008 - negative amount\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_009-Validate Headers and Body fiield",
+					"item": [
+						{
+							"name": "SEPA without Authorization",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Unauthorized Without Authorization Header (401)\", () => {\r",
+											"  pm.response.to.have.status(401);\r",
+											"});\r",
+											"pm.test(\"No Transaction Request Created (Auth Missing)\", () => {\r",
+											"  const r = pm.response.json() || {};\r",
+											"  pm.expect(r.transaction_request_id || r.id).to.be.oneOf([undefined, null, \"\"]);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"iban\": \"DE91100000000123456789\" },\r\n  \"value\": { \"currency\": \"EUR\", \"amount\": \"1.00\" },\r\n  \"description\": \"PI_009 - no Authorization header\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "SEPA with Content Type",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Unsupported or Missing Content-Type Returns 4xx\", () => {\r",
+											"  pm.response.to.have.status.within(400, 499);\r",
+											"});\r",
+											"pm.test(\"No Transaction Request Created (CT Missing)\", () => {\r",
+											"  const r = pm.response.json() || {};\r",
+											"  pm.expect(r.transaction_request_id || r.id).to.be.oneOf([undefined, null, \"\"]);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{dl_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "SEPA with incomplete Body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/***********************\r",
+											" * TC_PI_009 — Schema enforcement (single request runner)\r",
+											" * Runs 3.A (missing 'to'), 3.B (missing 'value'),\r",
+											" * 3.C.1 (value missing 'currency'), 3.C.2 (value missing 'amount')\r",
+											" ***********************/\r",
+											"\r",
+											"// ---- Environment & URL ----\r",
+											"const host        = pm.environment.get(\"host\");\r",
+											"const bankId      = pm.environment.get(\"bank_id\");\r",
+											"const accountId   = pm.environment.get(\"account_id\");\r",
+											"const viewId      = pm.environment.get(\"view_id\");\r",
+											"const dlToken     = pm.environment.get(\"DL_TOKEN\");\r",
+											"\r",
+											"const url = `${host}/obp/v4.0.0/banks/${bankId}/accounts/${accountId}/${viewId}/transaction-request-types/SEPA/transaction-requests`;\r",
+											"\r",
+											"const commonHeaders = {\r",
+											"  \"Authorization\": `DirectLogin token=${dlToken}`,\r",
+											"  \"Content-Type\": \"application/json\",\r",
+											"  \"Accept\": \"application/json\"\r",
+											"};\r",
+											"\r",
+											"// ---- Guard rails úteis (não falha o run, só alerta no console) ----\r",
+											"if (!host || !bankId || !accountId || !viewId) {\r",
+											"  console.warn(\"⚠️ Missing one or more required environment vars: host/bank_id/account_id/view_id\");\r",
+											"}\r",
+											"if (!dlToken) {\r",
+											"  console.warn(\"⚠️ DL_TOKEN is empty. These schema tests expect a valid token to isolate schema errors.\");\r",
+											"}\r",
+											"\r",
+											"// ---- Define os subcasos ----\r",
+											"const cases = [\r",
+											"  {\r",
+											"    name: \"3.A Missing 'to'\",\r",
+											"    body: {\r",
+											"      \"value\": { \"currency\": \"EUR\", \"amount\": \"1.00\" },\r",
+											"      \"description\": \"PI_009 - missing 'to'\"\r",
+											"    }\r",
+											"  },\r",
+											"  {\r",
+											"    name: \"3.B Missing 'value'\",\r",
+											"    body: {\r",
+											"      \"to\": { \"iban\": \"DE91100000000123456789\" },\r",
+											"      \"description\": \"PI_009 - missing 'value'\"\r",
+											"    }\r",
+											"  },\r",
+											"  {\r",
+											"    name: \"3.C.1 'value' missing 'currency'\",\r",
+											"    body: {\r",
+											"      \"to\": { \"iban\": \"DE91100000000123456789\" },\r",
+											"      \"value\": { \"amount\": \"1.00\" },\r",
+											"      \"description\": \"PI_009 - value missing currency\"\r",
+											"    }\r",
+											"  },\r",
+											"  {\r",
+											"    name: \"3.C.2 'value' missing 'amount'\",\r",
+											"    body: {\r",
+											"      \"to\": { \"iban\": \"DE91100000000123456789\" },\r",
+											"      \"value\": { \"currency\": \"EUR\" },\r",
+											"      \"description\": \"PI_009 - value missing amount\"\r",
+											"    }\r",
+											"  }\r",
+											"];\r",
+											"\r",
+											"// ---- Helpers de asserção para reutilizar ----\r",
+											"function assertSchemaViolation(caseName, err, resp, body) {\r",
+											"  // status 4xx\r",
+											"  pm.test(`[${caseName}] Schema Violation Returns 4xx`, function () {\r",
+											"    pm.expect(resp).to.have.property(\"code\");\r",
+											"    pm.expect(resp.code).to.be.within(400, 499);\r",
+											"  });\r",
+											"\r",
+											"  // resposta em JSON (best-effort)\r",
+											"  let json = {};\r",
+											"  try { json = typeof body === \"object\" ? body : JSON.parse(body); } catch (_) {}\r",
+											"\r",
+											"  // mensagem menciona campo/validação (best-effort)\r",
+											"  pm.test(`[${caseName}] Error Mentions Missing/Invalid Fields (Best-Effort)`, function () {\r",
+											"    const t = JSON.stringify(json).toUpperCase();\r",
+											"    pm.expect(\r",
+											"      t.includes(\"MISSING\") || t.includes(\"REQUIRED\") || t.includes(\"INVALID\") || t.includes(\"FIELD\") || t.includes(\"SCHEMA\")\r",
+											"    ).to.be.true;\r",
+											"  });\r",
+											"\r",
+											"  // não cria transaction_request_id\r",
+											"  pm.test(`[${caseName}] No Transaction Request Created (Schema)`, function () {\r",
+											"    const id = json?.transaction_request_id || json?.id;\r",
+											"    pm.expect([undefined, null, \"\"].includes(id)).to.be.true;\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// ---- Runner sequencial para manter logs organizados ----\r",
+											"let i = 0;\r",
+											"function runNext() {\r",
+											"  if (i >= cases.length) {\r",
+											"    console.log(\"✅ TC_PI_009 schema subcases finished.\");\r",
+											"    return;\r",
+											"  }\r",
+											"  const c = cases[i++];\r",
+											"\r",
+											"  const req = {\r",
+											"    url,\r",
+											"    method: \"POST\",\r",
+											"    header: Object.entries(commonHeaders).map(([key, value]) => ({ key, value })),\r",
+											"    body: { mode: \"raw\", raw: JSON.stringify(c.body) }\r",
+											"  };\r",
+											"\r",
+											"  console.log(`→ Running subcase: ${c.name}`);\r",
+											"  pm.sendRequest(req, function (err, res) {\r",
+											"    // Protege contra erros de rede\r",
+											"    pm.test(`[${c.name}] Request Completed`, function () {\r",
+											"      pm.expect(err, `Network error: ${err && err.message}`).to.be.null;\r",
+											"      pm.expect(res).to.be.an(\"object\");\r",
+											"    });\r",
+											"\r",
+											"    // Assertions principais do subcaso\r",
+											"    let parsed = {};\r",
+											"    try { parsed = res.json(); } catch (_) { parsed = {}; }\r",
+											"    assertSchemaViolation(c.name, err, res, parsed);\r",
+											"\r",
+											"    // Próximo subcaso\r",
+											"    runNext();\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Start\r",
+											"runNext();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{dl_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_010-Validate Field Lenth Limit",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"201 Created (Token Issued)\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token Captured\", () => pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}, password=\"{{password}}, consumer_key={{consumer_key}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Invalid Description",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// TC_PI_010 – build descriptions at the boundary\r",
+											"const TWO_K = 2000;\r",
+											"const TWO_K_PLUS_1 = 2001;\r",
+											"\r",
+											"// helper that produces deterministic payload (good for evidence)\r",
+											"function buildStr(len, ch=\"X\") {\r",
+											"  return ch.repeat(len);\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"desc_2000\", buildStr(TWO_K, \"A\"));\r",
+											"pm.environment.set(\"desc_2001\", buildStr(TWO_K_PLUS_1, \"B\"));\r",
+											"\r",
+											"// sanity (console only)\r",
+											"console.log(\"desc_2000 length:\", pm.environment.get(\"desc_2000\").length);\r",
+											"console.log(\"desc_2001 length:\", pm.environment.get(\"desc_2001\").length);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json() || {};\r",
+											"\r",
+											"pm.test(\"Description > 2000 Returns 4xx\", () => {\r",
+											"  pm.response.to.have.status.within(400, 499);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error Mentions Description Length (Best-Effort)\", () => {\r",
+											"  const t = JSON.stringify(res).toUpperCase();\r",
+											"  pm.expect(t).to.satisfy(s =>\r",
+											"    s.includes(\"DESCRIPTION\") || s.includes(\"LENGTH\") || s.includes(\"MAX\") || s.includes(\"2000\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No Transaction Request Created (Too Long Description)\", () => {\r",
+											"  pm.expect(res.transaction_request_id || res.id).to.be.oneOf([undefined, null, \"\"]);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{dl_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "file",
+									"file": {}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI_011-Validate SEPA future-dated",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"New Token Issued (201)\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token Captured\", () => pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}, password=\"{{password}}, consumer_key={{consumer_key}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create SEPA with future date",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Build a future date (today + 30 days) -> YYYYMMDD\r",
+											"const now = new Date();\r",
+											"const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30);\r",
+											"const y = d.getFullYear();\r",
+											"const m = String(d.getMonth() + 1).padStart(2, \"0\");\r",
+											"const day = String(d.getDate()).padStart(2, \"0\");\r",
+											"pm.environment.set(\"future_date\", `${y}${m}${day}`);\r",
+											"console.log(\"future_date =\", pm.environment.get(\"future_date\"));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Robust JSON parse\r",
+											"let res = {};\r",
+											"try { res = pm.response.json(); } catch(e) { res = {}; }\r",
+											"\r",
+											"const code = pm.response.code;\r",
+											"const status = String(res.status || res.transaction_request_status || \"\").toUpperCase();\r",
+											"\r",
+											"// 1) Aceito (201/200) OU explicitamente não suportado (4xx)\r",
+											"pm.test(\"Accepted OR Marked Blocked by Environment\", function () {\r",
+											"  pm.expect(\r",
+											"    [200,201].includes(code) || (code >= 400 && code < 500)\r",
+											"  ).to.be.true;\r",
+											"});\r",
+											"\r",
+											"// 2) Se aceito, deve haver ID + status inicial \"agendado/iniciado\"\r",
+											"if ([200,201].includes(code)) {\r",
+											"  pm.test(\"Transaction Request ID Present\", function () {\r",
+											"    pm.expect(res.transaction_request_id).to.be.a(\"string\").and.not.empty;\r",
+											"  });\r",
+											"  pm.test(\"Initial Status Is Scheduled/Initiated\", function () {\r",
+											"    // Doc cita INITIATED ou equivalente; aceitamos alguns rótulos comuns\r",
+											"    pm.expect([\"INITIATED\",\"SCHEDULED\",\"PENDING\",\"PENDING_CHALLENGE\",\"COMPLETED\"]).to.include(status);\r",
+											"  });\r",
+											"  pm.environment.set(\"transaction_request_id\", res.transaction_request_id);\r",
+											"} else {\r",
+											"  // 3) Se 4xx, registrar como \"Blocked by environment\" (best-effort)\r",
+											"  pm.test(\"Blocked by Environment: future_date not supported\", function () {\r",
+											"    const t = JSON.stringify(res).toUpperCase();\r",
+											"    // Mensagem deve indicar campo inválido/nao suportado\r",
+											"    pm.expect(\r",
+											"      t.includes(\"FUTURE_DATE\") || t.includes(\"UNSUPPORTED\") || t.includes(\"NOT SUPPORTED\") || t.includes(\"INVALID\")\r",
+											"    ).to.be.true;\r",
+											"  });\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{dl_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"iban\": \"{{valid_iban}}\" },\r\n  \"value\": { \"currency\": \"EUR\", \"amount\": \"1.00\" },\r\n  \"description\": \"PI_011 - future dated\",\r\n  \"future_date\": \"{{future_date}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SEPA/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SEPA",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Status confirmation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let st = {};\r",
+											"try { st = pm.response.json(); } catch(e) { st = {}; }\r",
+											"\r",
+											"pm.test(\"Status Endpoint Available (200)\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Terminal or Scheduled Status is Valid\", () => {\r",
+											"  const s = String(st.status || st.transaction_request_status || \"\").toUpperCase();\r",
+											"  pm.expect([\"INITIATED\",\"SCHEDULED\",\"PENDING_CHALLENGE\",\"COMPLETED\",\"FAILED\"]).to.include(s);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_PI-012-Validate SEPA type account/view",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"New Token Issued (201)\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token Captured\", () => pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transaction Request types",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Robust parse\r",
+											"let res; try { res = pm.response.json(); } catch(e) { res = []; }\r",
+											"\r",
+											"// 1) Deve responder 200\r",
+											"pm.test(\"Types Endpoint Available (200)\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"// 2) Normalizar & detectar \"SEPA\" em vários formatos possíveis\r",
+											"function toUpper(val) { return (val || \"\").toString().toUpperCase(); }\r",
+											"const asArray = Array.isArray(res) ? res : (res?.types || res?.data || []);\r",
+											"const hasSepa = Array.isArray(asArray)\r",
+											"  ? asArray.some(x => {\r",
+											"      const s = toUpper(\r",
+											"        (typeof x === \"string\" && x) ||\r",
+											"        x?.transaction_request_type || x?.type || x?.id || x?.name || x?.value\r",
+											"      );\r",
+											"      return s.includes(\"SEPA\");\r",
+											"    })\r",
+											"  : toUpper(JSON.stringify(res)).includes(\"SEPA\");\r",
+											"\r",
+											"// 3) Guardar evidência/apoio\r",
+											"const availableTypes = Array.isArray(asArray)\r",
+											"  ? asArray.map(x =>\r",
+											"      (typeof x === \"string\" && x) ||\r",
+											"      x?.transaction_request_type || x?.type || x?.id || x?.name || x?.value\r",
+											"    ).filter(Boolean)\r",
+											"  : [];\r",
+											"pm.environment.set(\"available_transaction_request_types\", JSON.stringify(availableTypes));\r",
+											"\r",
+											"// 4) Assert principal: SEPA listado\r",
+											"pm.test(\"SEPA Type Listed for This Account/View\", function () {\r",
+											"  pm.expect(hasSepa, \"SEPA not listed in transaction-request-types\").to.be.true;\r",
+											"});\r",
+											"\r",
+											"// 5) Se faltar SEPA, marcar como 'Blocked by environment' (sem quebrar a execução)\r",
+											"if (!hasSepa) {\r",
+											"  console.warn(\"⚠️ Blocked by environment: SEPA not available for this account/view.\", { availableTypes });\r",
+											"  pm.environment.set(\"sepa_available\", \"false\");\r",
+											"  pm.test(\"Blocked by Environment – SEPA not available\", function () {\r",
+											"    pm.expect(true).to.be.true; // marcador informativo\r",
+											"  });\r",
+											"} else {\r",
+											"  pm.environment.set(\"sepa_available\", \"true\");\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transaction-request-types",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// ---- Robust JSON parse ----\r",
+											"let res; try { res = pm.response.json(); } catch(e) { res = []; }\r",
+											"\r",
+											"// Normalize list\r",
+											"const list = Array.isArray(res) ? res : (res?.types || res?.data || []);\r",
+											"const toUpper = v => (v ?? \"\").toString().toUpperCase();\r",
+											"const types = Array.isArray(list)\r",
+											"  ? list.map(x => (typeof x === \"string\" && x) ||\r",
+											"                  x?.transaction_request_type || x?.type || x?.id || x?.name || x?.value).filter(Boolean)\r",
+											"  : [];\r",
+											"\r",
+											"// 1) Assert 200\r",
+											"pm.test(\"Types Endpoint Available (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"// 2) Detecta SEPA\r",
+											"const hasSEPA = (types.join(\"|\").toUpperCase()).includes(\"SEPA\");\r",
+											"\r",
+											"// 3) Guarda evidências em variáveis (úteis pra export/log)\r",
+											"pm.environment.set(\"available_transaction_request_types\", JSON.stringify(types));\r",
+											"pm.environment.set(\"sepa_available\", String(hasSEPA));\r",
+											"\r",
+											"// 4) Logs de evidência (aparecem no Console → screenshot)\r",
+											"console.log(\"🔎 TC_PI_012 — transaction-request-types:\", types);\r",
+											"if (hasSEPA) {\r",
+											"  console.log(\"✅ SEPA AVAILABLE for this account/view\");\r",
+											"  pm.test(\"SEPA Type Listed\", () => pm.expect(hasSEPA).to.be.true);\r",
+											"} else {\r",
+											"  console.warn(\"⚠️ Blocked by environment: SEPA NOT available for this account/view\");\r",
+											"  pm.test(\"Blocked by Environment — SEPA not available\", () => pm.expect(true).to.be.true);\r",
+											"}\r",
+											"\r",
+											"// (Opcional) Mostra tabela bonitinha no Console\r",
+											"if (types.length) {\r",
+											"  console.table(types.map(t => ({ type: t })));\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "GET {{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types",
+									"host": [
+										"GET {{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "TS_003-Reconciliation Balance & Transactions",
+			"item": [
+				{
+					"name": "TC_RC_001-Validate Source Account Balance",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"New Token Issued (201)\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);\r",
+											"pm.test(\"Token Captured\", () => pm.expect(pm.environment.get(\"DL_TOKEN\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}, password=\"{{password}}, consumer_key={{consumer_key}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Read before Balance",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let b = {}; try { b = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Balance Endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"const balBefore = String(b.balance || b.amount || b.value || b.current || \"0\");\r",
+											"pm.environment.set(\"balance_before\", balBefore);\r",
+											"pm.test(\"Balance Before Captured\", () => pm.expect(pm.environment.get(\"balance_before\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/balance",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"balance"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Initiate payment",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"pm.test(\"Accepted with Challenge (200/201/202)\", () => pm.expect([200,201,202]).to.include(pm.response.code));\r",
+											"pm.test(\"Status is PENDING_CHALLENGE\", () => pm.expect(res.status).to.eql(\"PENDING_CHALLENGE\"));\r",
+											"pm.environment.set(\"transaction_request_id\", res.transaction_request_id);\r",
+											"pm.environment.set(\"challenge_id\", res.challenge && res.challenge.id);\r",
+											"\r",
+											"// guarda taxa (se vier)\r",
+											"const charge = Number(res.charge && res.charge.amount ? res.charge.amount : 0);\r",
+											"pm.environment.set(\"charge_amount\", String(charge));\r",
+											"pm.test(\"IDs captured\", () => {\r",
+											"  pm.expect(pm.environment.get(\"transaction_request_id\")).to.be.ok;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"bank_id\": \"{{bank_id}}\", \"account_id\": \"{{to_account_id}}\" },\r\n  \"value\": { \"currency\": \"{{currency}}\", \"amount\": \"{{amount}}\" },\r\n  \"description\": \"{{description}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SANDBOX_TAN/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SANDBOX_TAN",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Answer Challenge",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const r = pm.response.json() || {};\r",
+											"pm.test(\"Challenge Accepted (200)\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Final Status is COMPLETED\", () => pm.expect(String(r.status).toUpperCase()).to.eql(\"COMPLETED\"));\r",
+											"pm.environment.set(\"payment_tx_ids\", JSON.stringify(r.transaction_ids || []));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"{{challenge_id}}\", \"answer\": \"123\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}/challenge",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}",
+										"challenge"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Read after Balance",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"function toCents(x){ return Math.round(Number(x)*100); }\r",
+											"\r",
+											"let b = {}; try { b = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Balance Endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"const before = toCents(pm.environment.get(\"balance_before\"));\r",
+											"const after  = toCents(String(b.balance || b.amount || b.value || b.current || \"0\"));\r",
+											"const amt    = toCents(pm.environment.get(\"amount\"));\r",
+											"const fee    = toCents(pm.environment.get(\"charge_amount\") || \"0\");\r",
+											"\r",
+											"// esperado: after = before - (amt + fee)\r",
+											"pm.test(\"Balance Debited by Amount (+fee)\", () => {\r",
+											"  pm.expect(after).to.eql(before - (amt + fee));\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/balance",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"balance"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Verify transaction",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"function toCents(x){ return Math.round(Number(x)*100); }\r",
+											"let data = {}; try { data = pm.response.json(); } catch(e) {}\r",
+											"\r",
+											"pm.test(\"Transactions Endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"// normaliza lista\r",
+											"const txs = data.transactions || data || [];\r",
+											"const amt  = toCents(pm.environment.get(\"amount\"));\r",
+											"const desc = pm.environment.get(\"description\") || \"RC_001\";\r",
+											"const txIds = JSON.parse(pm.environment.get(\"payment_tx_ids\") || \"[]\");\r",
+											"\r",
+											"// encontra o lançamento correspondente (por descrição OU id retornado)\r",
+											"const hit = txs.find(t => {\r",
+											"  const details = t.details || {};\r",
+											"  const thisDesc = (details.description || t.description || \"\").toString();\r",
+											"  const thisId = t.id || t.transaction_id;\r",
+											"  const thisAmt = toCents((t.value && t.value.amount) || details.value || details.amount || 0);\r",
+											"  const isDebit = ((t.details && t.details.type) || t.type || \"\").toString().toUpperCase().includes(\"DEBIT\");\r",
+											"  const matchesId = txIds.includes(thisId);\r",
+											"  const matchesDesc = thisDesc.includes(desc);\r",
+											"  const matchesAmt = thisAmt === amt; // valor absoluto\r",
+											"  return (matchesId || matchesDesc) && matchesAmt && isDebit;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Debit Transaction Present (matches amount/desc)\", () => {\r",
+											"  pm.expect(!!hit, \"No matching debit transaction found\").to.be.true;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transactions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_RC_002-Validate transactions list",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"New Token Issued (201)\", () => pm.response.to.have.status(201));\r",
+											"const token = pm.response.json() && pm.response.json().token;\r",
+											"pm.environment.set(\"DL_TOKEN\", token);\r",
+											"pm.test(\"Token captured\", () => pm.expect(token).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transactions baseline",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let before = {};\r",
+											"try { before = pm.response.json(); } catch(e) { before = {}; }\r",
+											"pm.environment.set(\"txs_before\", JSON.stringify(before.transactions || before || []));\r",
+											"pm.test(\"Transactions baseline captured\", () => pm.response.to.have.status(200));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transactions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create transaction challenge SANDBOX_TAN",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let res = {};\r",
+											"try { res = pm.response.json(); } catch(e) { res = {}; }\r",
+											"\r",
+											"pm.test(\"Accepted with Challenge (2xx)\", () => pm.expect([200,201,202]).to.include(pm.response.code));\r",
+											"pm.test(\"Initial Status is PENDING_CHALLENGE\", () => pm.expect(res.status).to.eql(\"PENDING_CHALLENGE\"));\r",
+											"\r",
+											"pm.environment.set(\"transaction_request_id\", res.transaction_request_id);\r",
+											"pm.environment.set(\"challenge_id\", (res.challenge && res.challenge.id) || \"\");\r",
+											"pm.test(\"IDs captured\", () => {\r",
+											"  pm.expect(pm.environment.get(\"transaction_request_id\")).to.be.ok;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"bank_id\": \"{{bank_id}}\", \"account_id\": \"{{to_account_id}}\" },\r\n  \"value\": { \"currency\": \"{{currency}}\", \"amount\": \"{{amount}}\" },\r\n  \"description\": \"{{description}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SANDBOX_TAN/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SANDBOX_TAN",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Answer Challenge",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let r = {};\r",
+											"try { r = pm.response.json(); } catch(e) { r = {}; }\r",
+											"\r",
+											"pm.test(\"Challenge Accepted (200)\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Final Status is COMPLETED\", () => pm.expect(String(r.status).toUpperCase()).to.eql(\"COMPLETED\"));\r",
+											"\r",
+											"// may include transaction ids (array) – save for matching\r",
+											"pm.environment.set(\"payment_tx_ids\", JSON.stringify(r.transaction_ids || []));\r",
+											"pm.environment.set(\"payment_desc\", pm.environment.get(\"description\"));\r",
+											"pm.environment.set(\"payment_amount\", pm.environment.get(\"amount\"));\r",
+											"pm.test(\"Tx IDs captured (if present)\", () => {\r",
+											"  pm.expect(pm.environment.get(\"payment_tx_ids\")).to.be.a(\"string\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"{{challenge_id}}\", \"answer\": \"123\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}/challenge",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}",
+										"challenge"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get transactions",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"function toCents(x){ return Math.round(Number(x) * 100); }\r",
+											"function safeJson(resp) {\r",
+											"  try { return resp.json(); } catch(e) { return {}; }\r",
+											"}\r",
+											"\r",
+											"const env = pm.environment;\r",
+											"const respJson = safeJson(pm.response);\r",
+											"const code = pm.response.code;\r",
+											"\r",
+											"// Basic endpoint healthy\r",
+											"pm.test(\"Transactions Endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"// get tx list structure (try common shapes)\r",
+											"let txs = [];\r",
+											"if (Array.isArray(respJson.transactions)) txs = respJson.transactions;\r",
+											"else if (Array.isArray(respJson)) txs = respJson;\r",
+											"else if (Array.isArray(respJson.data)) txs = respJson.data;\r",
+											"else txs = respJson.transactions || [];\r",
+											"\r",
+											"// expected amount/desc/id from env\r",
+											"const expectedAmount = env.get(\"payment_amount\") || env.get(\"amount\");\r",
+											"const expectedDesc   = env.get(\"payment_desc\") || env.get(\"description\") || \"\";\r",
+											"const txIds          = (() => {\r",
+											"  try { return JSON.parse(env.get(\"payment_tx_ids\") || \"[]\"); } catch(e) { return []; }\r",
+											"})();\r",
+											"\r",
+											"// convert to cents for comparison\r",
+											"const expectedCents = toCents(expectedAmount);\r",
+											"\r",
+											"// search predicate: try match by id first, then by amount+desc\r",
+											"function txAmountCents(tx) {\r",
+											"  // try many locations\r",
+											"  const cand = tx.value?.amount || tx.details?.value || tx.details?.amount || tx.amount || tx.value_amount;\r",
+											"  return toCents(cand || 0);\r",
+											"}\r",
+											"function txDesc(tx) {\r",
+											"  return (tx.details && (tx.details.description || tx.details.narrative)) || tx.description || \"\";\r",
+											"}\r",
+											"function txId(tx) {\r",
+											"  return tx.id || tx.transaction_id || tx.details && tx.details.transaction_id || \"\";\r",
+											"}\r",
+											"function txIsDebit(tx) {\r",
+											"  const ttype = (tx.details && tx.details.type) || tx.type || (tx.details && tx.details.posting) || \"\";\r",
+											"  return (String(ttype).toUpperCase().includes(\"DEBIT\") || String(ttype).toUpperCase().includes(\"OUT\"));\r",
+											"}\r",
+											"\r",
+											"let match = null;\r",
+											"\r",
+											"// 1) match by returned transaction_ids if any\r",
+											"if (txIds.length) {\r",
+											"  match = txs.find(t => txIds.includes(txId(t)));\r",
+											"}\r",
+											"\r",
+											"// 2) fallback: match by amount (cents) + description substring + debit type\r",
+											"if (!match) {\r",
+											"  match = txs.find(t => {\r",
+											"    try {\r",
+											"      const cents = txAmountCents(t);\r",
+											"      const desc  = String(txDesc(t) || \"\").toUpperCase();\r",
+											"      const isDebit = txIsDebit(t);\r",
+											"      return cents === expectedCents && desc.includes(String(expectedDesc).toUpperCase()) && isDebit;\r",
+											"    } catch(e) { return false; }\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// 3) final assertion\r",
+											"pm.test(\"Debit Transaction Present (matches amount/desc or id)\", function () {\r",
+											"  pm.expect(!!match, `No matching debit transaction found. Searched for amount=${expectedAmount}, desc=\"${expectedDesc}\", ids=${JSON.stringify(txIds)}. Returned tx count=${txs.length}`).to.be.true;\r",
+											"  if (match) {\r",
+											"    // save evidence: found tx id and amount\r",
+											"    env.set(\"reconciled_tx_id\", txId(match));\r",
+											"    env.set(\"reconciled_tx_amount\", String(txAmountCents(match)/100));\r",
+											"  }\r",
+											"});\r",
+											"\r",
+											"// ---- Optional polling helper: if not found, schedule retry via postman.setNextRequest ----\r",
+											"// Polling only if env vars set and we haven't exhausted attempts\r",
+											"if (!match) {\r",
+											"  const interval = Number(env.get(\"poll_interval_ms\") || 2000);\r",
+											"  const maxAttempts = Number(env.get(\"poll_max_attempts\") || 0);\r",
+											"  const keyAttempts = \"poll_attempts\";\r",
+											"  const attempts = Number(env.get(keyAttempts) || 0);\r",
+											"\r",
+											"  if (maxAttempts > 0 && attempts < maxAttempts) {\r",
+											"    env.set(keyAttempts, String(attempts + 1));\r",
+											"    console.log(`No match yet (attempt ${attempts+1}/${maxAttempts}). Waiting ${interval}ms then re-running GET transactions.`);\r",
+											"    // wait by scheduling the same request again (Postman will immediately start next; use setTimeout hack is not possible here)\r",
+											"    // So we use setNextRequest to run the same request again — but must be called from a request in a collection runner.\r",
+											"    postman.setNextRequest(pm.info.requestName); // requires this GET to be in a Collection Runner\r",
+											"  } else {\r",
+											"    // exhausted polling, clear attempts\r",
+											"    env.unset(\"poll_attempts\");\r",
+											"  }\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transactions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_RC_003-Validate Destination Account",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"New Token Issued (201)\", () => pm.response.to.have.status(201));\r",
+											"const token = pm.response.json().token;\r",
+											"pm.environment.set(\"DL_TOKEN\", token);\r",
+											"pm.test(\"Token captured\", () => pm.expect(token).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}, password=\"{{password}}, consumer_key={{consumer_key}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Account Balance Before",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let b = {}; \r",
+											"try { b = pm.response.json(); } catch(e) {}\r",
+											"\r",
+											"pm.test(\"Balance Endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"const before = b.balance || b.amount || b.value || b.current || 0;\r",
+											"pm.environment.set(\"balance_dest_before\", String(before));\r",
+											"\r",
+											"pm.test(\"Captured destination balance before\", () => {\r",
+											"  pm.expect(pm.environment.get(\"balance_dest_before\")).to.be.a(\"string\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{to_account_id}}/{{to_view_id}}/balance",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{to_account_id}}",
+										"{{to_view_id}}",
+										"balance"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Make payments",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let res = {};\r",
+											"try { res = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Accepted with Challenge (2xx)\", () => pm.expect([200,201,202]).to.include(pm.response.code));\r",
+											"pm.environment.set(\"transaction_request_id\", res.transaction_request_id);\r",
+											"pm.environment.set(\"challenge_id\", res.challenge && res.challenge.id);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"bank_id\": \"{{bank_id}}\", \"account_id\": \"{{to_account_id}}\" },\r\n  \"value\": { \"currency\": \"{{currency}}\", \"amount\": \"{{amount}}\" },\r\n  \"description\": \"{{description}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SANDBOX_TAN/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SANDBOX_TAN",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Answer Challenge",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let r = pm.response.json();\r",
+											"pm.test(\"Challenge Accepted (200)\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Status is COMPLETED\", () => pm.expect(String(r.status).toUpperCase()).to.eql(\"COMPLETED\"));\r",
+											"pm.environment.set(\"payment_tx_ids\", JSON.stringify(r.transaction_ids || []));\r",
+											"pm.environment.set(\"payment_desc\", pm.environment.get(\"description\"));\r",
+											"pm.environment.set(\"payment_amount\", pm.environment.get(\"amount\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"{{challenge_id}}\", \"answer\": \"123\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}/challenge",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}",
+										"challenge"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Destiny Account Balance After",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"function toCents(x){ return Math.round(Number(x) * 100); }\r",
+											"\r",
+											"let b = {};\r",
+											"try { b = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Balance Endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"const before = toCents(pm.environment.get(\"balance_dest_before\"));\r",
+											"const after  = toCents(b.balance || b.amount || b.value || b.current || 0);\r",
+											"const amt    = toCents(pm.environment.get(\"amount\"));\r",
+											"\r",
+											"// expected: after = before + amt\r",
+											"pm.test(\"Destination balance credited by amount\", () => {\r",
+											"  pm.expect(after).to.eql(before + amt);\r",
+											"});\r",
+											"pm.environment.set(\"balance_dest_after\", String(after / 100));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{to_account_id}}/{{to_view_id}}/balance",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{to_account_id}}",
+										"{{to_view_id}}",
+										"balance"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Destiny Account Transactions",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"function toCents(x){ return Math.round(Number(x) * 100); }\r",
+											"\r",
+											"let data = {}; \r",
+											"try { data = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Transactions Endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"const txs = data.transactions || data || [];\r",
+											"const amt = toCents(pm.environment.get(\"amount\"));\r",
+											"const desc = pm.environment.get(\"payment_desc\") || \"RC_003\";\r",
+											"const txIds = JSON.parse(pm.environment.get(\"payment_tx_ids\") || \"[]\");\r",
+											"\r",
+											"// helper fns\r",
+											"const txId = t => t.id || t.transaction_id || \"\";\r",
+											"const txAmt = t => toCents((t.value && t.value.amount) || (t.details && t.details.value) || 0);\r",
+											"const txDesc = t => (t.details && t.details.description) || t.description || \"\";\r",
+											"const txIsCredit = t => {\r",
+											"  const type = ((t.details && t.details.type) || t.type || \"\").toUpperCase();\r",
+											"  return type.includes(\"CREDIT\") || type.includes(\"IN\");\r",
+											"};\r",
+											"\r",
+											"// try to find a match\r",
+											"let hit = null;\r",
+											"if (txIds.length) {\r",
+											"  hit = txs.find(t => txIds.includes(txId(t)));\r",
+											"}\r",
+											"if (!hit) {\r",
+											"  hit = txs.find(t => {\r",
+											"    const okAmt = txAmt(t) === amt;\r",
+											"    const okDesc = txDesc(t).toUpperCase().includes(desc.toUpperCase());\r",
+											"    const okType = txIsCredit(t);\r",
+											"    return okAmt && okDesc && okType;\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"pm.test(\"Credit Transaction Present (matches amount/desc or id)\", () => {\r",
+											"  pm.expect(!!hit, `No credit found for amount=${amt}, desc=${desc}, ids=${txIds}`).to.be.true;\r",
+											"  if (hit) {\r",
+											"    pm.environment.set(\"reconciled_credit_tx_id\", txId(hit));\r",
+											"    pm.environment.set(\"reconciled_credit_tx_amount\", String(txAmt(hit)/100));\r",
+											"  }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{to_account_id}}/{{to_view_id}}/transactions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{to_account_id}}",
+										"{{to_view_id}}",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_RC_004-Validate Transaction Date Range",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"New Token Issued (201)\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create SANDBOX_TAN payment",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const r = pm.response.json();\r",
+											"pm.test(\"Accepted with Challenge (2xx)\", () => pm.expect([200,201,202]).to.include(pm.response.code));\r",
+											"pm.test(\"Status is PENDING_CHALLENGE\", () => pm.expect(r.status).to.eql(\"PENDING_CHALLENGE\"));\r",
+											"pm.environment.set(\"transaction_request_id\", r.transaction_request_id);\r",
+											"pm.environment.set(\"challenge_id\", (r.challenge && r.challenge.id) || \"\");\r",
+											"pm.environment.set(\"payment_desc\", pm.environment.get(\"description\"));\r",
+											"pm.environment.set(\"payment_amount\", pm.environment.get(\"amount\"));\r",
+											"pm.environment.set(\"payment_date\", new Date().toISOString().split(\"T\")[0]);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"bank_id\": \"{{bank_id}}\", \"account_id\": \"{{to_account_id}}\" },\r\n  \"value\": { \"currency\": \"{{currency}}\", \"amount\": \"{{amount}}\" },\r\n  \"description\": \"{{description}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SANDBOX_TAN/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SANDBOX_TAN",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Answer Challenge",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const r = pm.response.json();\r",
+											"pm.test(\"Challenge Accepted (200)\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Final Status is COMPLETED\", () => pm.expect(String(r.status).toUpperCase()).to.eql(\"COMPLETED\"));\r",
+											"pm.environment.set(\"payment_tx_ids\", JSON.stringify(r.transaction_ids || []));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"{{challenge_id}}\", \"answer\": \"123\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}/challenge",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}",
+										"challenge"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transactions",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const payDate = new Date(pm.environment.get(\"payment_date\"));\r",
+											"const from = new Date(payDate); from.setDate(payDate.getDate() - 1);\r",
+											"const to = new Date(payDate); to.setDate(payDate.getDate() + 1);\r",
+											"\r",
+											"function isoDate(d) {\r",
+											"  return d.toISOString().split(\"T\")[0];\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"from_date\", isoDate(from));\r",
+											"pm.environment.set(\"to_date\", isoDate(to));\r",
+											"\r",
+											"console.log(`Filter range: ${pm.environment.get(\"from_date\")} -> ${pm.environment.get(\"to_date\")}`);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"function toCents(x){ return Math.round(Number(x) * 100); }\r",
+											"\r",
+											"let data = {};\r",
+											"try { data = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Transactions Endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"const txs = data.transactions || data || [];\r",
+											"const amt = toCents(pm.environment.get(\"payment_amount\"));\r",
+											"const desc = pm.environment.get(\"payment_desc\") || \"RC_004\";\r",
+											"const txIds = JSON.parse(pm.environment.get(\"payment_tx_ids\") || \"[]\");\r",
+											"const date = pm.environment.get(\"payment_date\");\r",
+											"\r",
+											"// helpers\r",
+											"const txId = t => t.id || t.transaction_id || \"\";\r",
+											"const txAmt = t => toCents((t.value && t.value.amount) || (t.details && t.details.value) || 0);\r",
+											"const txDesc = t => (t.details && t.details.description) || t.description || \"\";\r",
+											"const txDate = t => (t.details && t.details.completed_date) || t.completed_date || t.posted || \"\";\r",
+											"const txIsDebit = t => ((t.details && t.details.type) || t.type || \"\").toUpperCase().includes(\"DEBIT\");\r",
+											"\r",
+											"let match = null;\r",
+											"\r",
+											"// Match by ID first\r",
+											"if (txIds.length) {\r",
+											"  match = txs.find(t => txIds.includes(txId(t)));\r",
+											"}\r",
+											"// Fallback: match by amount, desc, type, and date within ±1 day window\r",
+											"if (!match) {\r",
+											"  const payDate = new Date(date);\r",
+											"  const from = new Date(pm.environment.get(\"from_date\"));\r",
+											"  const to = new Date(pm.environment.get(\"to_date\"));\r",
+											"  match = txs.find(t => {\r",
+											"    const d = new Date(txDate(t));\r",
+											"    return txAmt(t) === amt &&\r",
+											"           txDesc(t).toUpperCase().includes(desc.toUpperCase()) &&\r",
+											"           txIsDebit(t) &&\r",
+											"           d >= from && d <= to;\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"pm.test(\"Transaction Present Within Date Range Filter\", () => {\r",
+											"  pm.expect(!!match, `No transaction found within ${pm.environment.get(\"from_date\")} → ${pm.environment.get(\"to_date\")}`).to.be.true;\r",
+											"});\r",
+											"\r",
+											"if (match) {\r",
+											"  pm.environment.set(\"filtered_tx_id\", txId(match));\r",
+											"  pm.environment.set(\"filtered_tx_date\", txDate(match));\r",
+											"  console.log(\"Matched TX:\", txId(match), txDate(match));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transactions?from_date={{from_date}}&to_date={{to_date}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transactions"
+									],
+									"query": [
+										{
+											"key": "from_date",
+											"value": "{{from_date}}"
+										},
+										{
+											"key": "to_date",
+											"value": "{{to_date}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_RC_005-Validate Currency Consistency",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"New Token Issued (201)\", () => pm.response.to.have.status(201));\r",
+											"pm.environment.set(\"DL_TOKEN\", pm.response.json().token);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Origin Account Balance",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let b = {};\r",
+											"try { b = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Source balance reachable (200)\", () => pm.response.to.have.status(200));\r",
+											"const srcCurr = b.currency || (b.balance && b.balance.currency) || b.value?.currency || \"UNKNOWN\";\r",
+											"pm.environment.set(\"source_balance_currency\", srcCurr);\r",
+											"pm.test(\"Captured source balance currency\", () => pm.expect(srcCurr).to.match(/^[A-Z]{3}$/));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/balance",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"balance"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Destiny Account Balance",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let b = {};\r",
+											"try { b = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Destination balance reachable (200)\", () => pm.response.to.have.status(200));\r",
+											"const destCurr = b.currency || (b.balance && b.balance.currency) || b.value?.currency || \"UNKNOWN\";\r",
+											"pm.environment.set(\"dest_balance_currency\", destCurr);\r",
+											"pm.test(\"Captured destination balance currency\", () => pm.expect(destCurr).to.match(/^[A-Z]{3}$/));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{to_account_id}}/{{to_view_id}}/balance",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{to_account_id}}",
+										"{{to_view_id}}",
+										"balance"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create SANDBOX_TAN payment",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const r = pm.response.json();\r",
+											"pm.test(\"Accepted with Challenge (2xx)\", () => pm.expect([200,201,202]).to.include(pm.response.code));\r",
+											"pm.environment.set(\"payment_currency\", r.value?.currency || pm.environment.get(\"currency\") || \"UNKNOWN\");\r",
+											"pm.environment.set(\"transaction_request_id\", r.transaction_request_id);\r",
+											"pm.environment.set(\"challenge_id\", (r.challenge && r.challenge.id) || \"\");\r",
+											"pm.test(\"Captured payment currency\", () => pm.expect(pm.environment.get(\"payment_currency\")).to.match(/^[A-Z]{3}$/));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"bank_id\": \"{{bank_id}}\", \"account_id\": \"{{to_account_id}}\" },\r\n  \"value\": { \"currency\": \"{{currency}}\", \"amount\": \"{{amount}}\" },\r\n  \"description\": \"{{description}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SANDBOX_TAN/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SANDBOX_TAN",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Answer Challenge",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const r = pm.response.json();\r",
+											"pm.test(\"Challenge Accepted (200)\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Status is COMPLETED\", () => pm.expect(String(r.status).toUpperCase()).to.eql(\"COMPLETED\"));\r",
+											"pm.environment.set(\"payment_tx_ids\", JSON.stringify(r.transaction_ids || []));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"{{challenge_id}}\", \"answer\": \"123\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}/challenge",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}",
+										"challenge"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transaction Origin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let data = {};\r",
+											"try { data = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Transactions endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"const txs = data.transactions || data || [];\r",
+											"const txIds = JSON.parse(pm.environment.get(\"payment_tx_ids\") || \"[]\");\r",
+											"const expectedCurr = pm.environment.get(\"payment_currency\");\r",
+											"\r",
+											"let match = null;\r",
+											"if (txIds.length) match = txs.find(t => txIds.includes(t.id || t.transaction_id));\r",
+											"\r",
+											"if (!match) {\r",
+											"  const amt = pm.environment.get(\"amount\");\r",
+											"  const desc = pm.environment.get(\"description\");\r",
+											"  match = txs.find(t => {\r",
+											"    const val = t.value?.amount || t.details?.value;\r",
+											"    const descField = (t.details?.description || t.description || \"\").toUpperCase();\r",
+											"    return val == amt && descField.includes(desc.toUpperCase());\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"const txCurr = match ? (match.value?.currency || match.details?.value_currency || \"UNKNOWN\") : \"NOT_FOUND\";\r",
+											"\r",
+											"pm.test(\"Transaction currency matches payment currency\", () => {\r",
+											"  pm.expect(txCurr).to.eql(expectedCurr);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transactions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transaction Destiny",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let data = {};\r",
+											"try { data = pm.response.json(); } catch(e) {}\r",
+											"pm.test(\"Transactions endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"const txs = data.transactions || data || [];\r",
+											"const txIds = JSON.parse(pm.environment.get(\"payment_tx_ids\") || \"[]\");\r",
+											"const expectedCurr = pm.environment.get(\"payment_currency\");\r",
+											"\r",
+											"let match = null;\r",
+											"if (txIds.length) match = txs.find(t => txIds.includes(t.id || t.transaction_id));\r",
+											"\r",
+											"if (!match) {\r",
+											"  const amt = pm.environment.get(\"amount\");\r",
+											"  const desc = pm.environment.get(\"description\");\r",
+											"  match = txs.find(t => {\r",
+											"    const val = t.value?.amount || t.details?.value;\r",
+											"    const descField = (t.details?.description || t.description || \"\").toUpperCase();\r",
+											"    return val == amt && descField.includes(desc.toUpperCase());\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"const txCurr = match ? (match.value?.currency || match.details?.value_currency || \"UNKNOWN\") : \"NOT_FOUND\";\r",
+											"\r",
+											"pm.test(\"Transaction currency matches payment currency\", () => {\r",
+											"  pm.expect(txCurr).to.eql(expectedCurr);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{to_account_id}}/{{to_view_id}}/transactions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{to_account_id}}",
+										"{{to_view_id}}",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TC_RC_006-Validate Failed payment",
+					"item": [
+						{
+							"name": "Direct Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"New Token Issued (201)\", () => pm.response.to.have.status(201));\r",
+											"const token = pm.response.json() && pm.response.json().token;\r",
+											"pm.environment.set(\"DL_TOKEN\", token);\r",
+											"pm.test(\"Token captured\", () => pm.expect(token).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin username=\"{{username}}\", password=\"{{password}}\", consumer_key={{consumer_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/my/logins/direct",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"my",
+										"logins",
+										"direct"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Balance before",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let b = {};\r",
+											"try { b = pm.response.json(); } catch(e) { b = {}; }\r",
+											"pm.test(\"Balance Endpoint Before (200)\", () => pm.response.to.have.status(200));\r",
+											"const before = b.balance || b.amount || b.value || b.current || 0;\r",
+											"pm.environment.set(\"balance_before\", String(before));\r",
+											"pm.environment.set(\"balance_before_currency\", b.currency || (b.balance && b.balance.currency) || \"UNKNOWN\");\r",
+											"pm.test(\"Balance before captured\", () => pm.expect(pm.environment.get(\"balance_before\")).to.be.a(\"string\"));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/balance",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"balance"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transaction Snapshot before",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let data = {};\r",
+											"try { data = pm.response.json(); } catch(e) { data = {}; }\r",
+											"pm.test(\"Transactions Endpoint Before (200)\", () => pm.response.to.have.status(200));\r",
+											"const txsBefore = data.transactions || data || [];\r",
+											"pm.environment.set(\"txs_before\", JSON.stringify(txsBefore));\r",
+											"pm.test(\"Transactions before captured\", () => pm.expect(Array.isArray(txsBefore)).to.be.true);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transactions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create transaction (force challenge SANDBOX_TAN)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let res = {};\r",
+											"try { res = pm.response.json(); } catch(e) { res = {}; }\r",
+											"\r",
+											"pm.test(\"Transaction Request Created with Challenge (2xx)\", () => pm.expect([200,201,202]).to.include(pm.response.code));\r",
+											"pm.test(\"Status is PENDING_CHALLENGE\", () => pm.expect(res.status).to.eql(\"PENDING_CHALLENGE\"));\r",
+											"\r",
+											"pm.environment.set(\"transaction_request_id\", res.transaction_request_id);\r",
+											"pm.environment.set(\"challenge_id\", res.challenge && res.challenge.id || \"\");\r",
+											"pm.environment.set(\"allowed_attempts\", String((res.challenge && res.challenge.allowed_attempts) || 3)); // default 3\r",
+											"pm.environment.set(\"challenge_attempts_done\", \"0\");\r",
+											"\r",
+											"pm.test(\"IDs Captured\", () => pm.expect(pm.environment.get(\"transaction_request_id\")).to.be.ok);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to\": { \"bank_id\": \"{{bank_id}}\", \"account_id\": \"{{to_account_id}}\" },\r\n  \"value\": { \"currency\": \"{{currency}}\", \"amount\": \"{{amount}}\" },\r\n  \"description\": \"{{description}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-request-types/SANDBOX_TAN/transaction-requests",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-request-types",
+										"SANDBOX_TAN",
+										"transaction-requests"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Force Failed Invalid TAN",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let res = {};\r",
+											"try { res = pm.response.json(); } catch(e) { res = {}; }\r",
+											"\r",
+											"const env = pm.environment;\r",
+											"const code = pm.response.code;\r",
+											"\r",
+											"// If server rejected with client error (4xx) on invalid attempt, still count it and continue until allowed_attempts exhausted.\r",
+											"// get allowed attempts from env (set in create step)\r",
+											"const allowed = Number(env.get(\"allowed_attempts\") || 3);\r",
+											"let done = Number(env.get(\"challenge_attempts_done\") || 0);\r",
+											"\r",
+											"// increment attempts_done if this was an attempt (we just posted)\r",
+											"done += 1;\r",
+											"env.set(\"challenge_attempts_done\", String(done));\r",
+											"\r",
+											"pm.test(\"Challenge Attempt Recorded (any response code)\", function () {\r",
+											"  pm.expect([200,201,202,400,401,403]).to.include(code);\r",
+											"});\r",
+											"\r",
+											"// If response indicates FAILED state or res.status == FAILED, mark failure complete\r",
+											"const status = (res && res.status) ? String(res.status).toUpperCase() : \"\";\r",
+											"if (status === \"FAILED\") {\r",
+											"  pm.test(\"Transaction reached FAILED status\", () => pm.expect(status).to.eql(\"FAILED\"));\r",
+											"  env.set(\"transaction_status_final\", \"FAILED\");\r",
+											"} else {\r",
+											"  // Not yet failed. If attempts < allowed, schedule another attempt in runner\r",
+											"  if (done < allowed) {\r",
+											"    console.log(`Attempt ${done}/${allowed} failed; will retry invalid answer to exhaust attempts.`);\r",
+											"    // schedule same challenge request again in collection runner\r",
+											"    postman.setNextRequest(pm.info.requestName);\r",
+											"  } else {\r",
+											"    // We attempted allowed times. Some sandboxes set status to FAILED on last bad attempt; try to fetch TR status to confirm.\r",
+											"    console.log(`Exhausted allowed attempts (${allowed}). Will verify TR status via GET.`);\r",
+											"    // set NextRequest to a small request that GETs the transaction-request status (name must match in collection)\r",
+											"    postman.setNextRequest(\"GET Transaction-Request Status\");\r",
+											"  }\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token=\"{{DL_TOKEN}}\"",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"{{challenge_id}}\", \"answer\": \"{{challenge_attempt_answer_invalid}}\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}/challenge",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}",
+										"challenge"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transaction Request Status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let r = {};\r",
+											"try { r = pm.response.json(); } catch(e) { r = {}; }\r",
+											"pm.test(\"TR Status Endpoint (200)\", () => pm.response.to.have.status(200));\r",
+											"const final = (r && r.status) ? String(r.status).toUpperCase() : \"\";\r",
+											"pm.test(\"Transaction Request Final Status is FAILED\", () => pm.expect(final).to.eql(\"FAILED\"));\r",
+											"pm.environment.set(\"transaction_status_final\", final);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transaction-requests/{{transaction_request_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transaction-requests",
+										"{{transaction_request_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Balance after origin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"function toCents(x){ return Math.round(Number(x) * 100); }\r",
+											"\r",
+											"let b = {};\r",
+											"try { b = pm.response.json(); } catch(e) { b = {}; }\r",
+											"\r",
+											"pm.test(\"Balance Endpoint After (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"const before = toCents(pm.environment.get(\"balance_before\"));\r",
+											"const after = toCents(b.balance || b.amount || b.value || b.current || 0);\r",
+											"const amt = toCents(pm.environment.get(\"amount\"));\r",
+											"\r",
+											"// expected: after == before (no debit applied)\r",
+											"pm.test(\"Balance Unchanged After FAILED Payment\", () => {\r",
+											"  pm.expect(after).to.eql(before);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/balance",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"balance"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transactions after origin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"function toCents(x){ return Math.round(Number(x) * 100); }\r",
+											"\r",
+											"let data = {};\r",
+											"try { data = pm.response.json(); } catch(e) { data = {}; }\r",
+											"\r",
+											"pm.test(\"Transactions Endpoint After (200)\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"const txsBefore = JSON.parse(pm.environment.get(\"txs_before\") || \"[]\");\r",
+											"const txsAfter = data.transactions || data || [];\r",
+											"\r",
+											"// quick heuristic: ensure no new tx with same amount+description and debit type exists\r",
+											"const expectedAmt = toCents(pm.environment.get(\"amount\"));\r",
+											"const expectedDesc = pm.environment.get(\"description\").toUpperCase();\r",
+											"\r",
+											"const newTx = txsAfter.find(t => {\r",
+											"  // skip any txs that were already present (compare IDs if available)\r",
+											"  const id = t.id || t.transaction_id || \"\";\r",
+											"  if (txsBefore.some(tb => (tb.id || tb.transaction_id || \"\") === id)) return false;\r",
+											"\r",
+											"  // check debit and match amount+desc\r",
+											"  const val = t.value && t.value.amount || t.details && t.details.value || 0;\r",
+											"  const desc = (t.details && t.details.description) || t.description || \"\";\r",
+											"  const type = ((t.details && t.details.type) || t.type || \"\").toUpperCase();\r",
+											"  const isDebit = type.includes(\"DEBIT\") || type.includes(\"OUT\");\r",
+											"  const matchesAmt = toCents(val) === expectedAmt;\r",
+											"  const matchesDesc = desc.toUpperCase().includes(expectedDesc);\r",
+											"  return isDebit && matchesAmt && matchesDesc;\r",
+											"});\r",
+											"\r",
+											"// Assert no new debit was found\r",
+											"pm.test(\"No New Debit Transaction Created After FAILED Payment\", () => {\r",
+											"  pm.expect(newTx).to.be.undefined;\r",
+											"});\r",
+											"\r",
+											"// Optionally, if transaction IDs were returned anywhere, ensure they are empty or not present\r",
+											"const txIds = (()=>{ try { return JSON.parse(pm.environment.get(\"payment_tx_ids\")||\"[]\") } catch(e){return []}})();\r",
+											"pm.test(\"No confirmed transaction IDs from failed operation\", () => {\r",
+											"  pm.expect(txIds.length).to.be.oneOf([0, null]);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "DirectLogin token={{DL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/obp/v4.0.0/banks/{{bank_id}}/accounts/{{account_id}}/{{view_id}}/transactions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"obp",
+										"v4.0.0",
+										"banks",
+										"{{bank_id}}",
+										"accounts",
+										"{{account_id}}",
+										"{{view_id}}",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
